@@ -1,15 +1,17 @@
 {
-  "name": "Drop In Emails",
+  "name": "DropIn-Emails",
   "version": "1.0.0",
   "description": "Scripts to send emails to users",
+  "scripts": {
+    "start": "node ./app.js"
+  },
   "dependencies": {
-    "bluebird": "3.4.1",
     "email-templates": "2.3.2",
+    "express": "4.14.0",
     "handlebars": "4.0.5",
     "lodash": "4.13.1",
     "mailgun-js": "0.7.11",
-    "moment": "^2.14.1",
-    "mongoose": "4.5.3",
-    "parse": "^1.9.0"
+    "moment": "2.14.1",
+    "parse": "1.9.0"
   }
 }
