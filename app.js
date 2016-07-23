@@ -14,7 +14,6 @@ var path = require('path');
 var EmailTemplate = require('email-templates').EmailTemplate;
 var _ = require('lodash');
 var moment = require('moment');
-var promise = require('bluebird');
 var Handlebars = require('handlebars');
 
 var templateDir = path.resolve(__dirname, 'templates', 'july-2016', 'test');
