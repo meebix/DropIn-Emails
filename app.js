@@ -32,12 +32,12 @@ app.get('/send/:list', function(req, res) {
   // Name of the mailing list before @ {String}
   var mailingList = req.params.list + '@joindropin.com';
 
-  generateEmail(mailingList);
+  generateEmail(req, res, mailingList);
   res.status(200).end();
 });
 
 // Mailing Functions
-function generateEmail(mailingList) {
+function generateEmail(req, res, mailingList) {
   var list = mailgun.lists(mailingList);
 
   list.members().list(function (err, data) {
@@ -67,12 +67,14 @@ function generateEmail(mailingList) {
         usersRewardsQuery.greaterThanOrEqualTo('rewardActiveStart', today);
         usersRewardsQuery.lessThanOrEqualTo('rewardActiveStart', sevenDaysForward);
         usersRewardsQuery.include('barId');
+        usersRewardsQuery.include('userId');
         return usersRewardsQuery.find().then(function(results) {
           var rewards = [];
 
           _.each(results, function(result) {
             var meta = {};
 
+            meta.email = result.attributes.userId.attributes.email;
             meta.barName = result.attributes.barId.attributes.name;
             meta.rewardName = result.attributes.rewardName;
             meta.startDate = result.attributes.rewardActiveStart;
@@ -87,6 +89,7 @@ function generateEmail(mailingList) {
         }) // End Users Rewards
         .then(function(rewards) {
           var final = {
+            email: rewards[0].email,
             rewards: rewards
           };
 
@@ -94,15 +97,17 @@ function generateEmail(mailingList) {
           .then(function (template) {
             var emailData = {
               from: 'Mike\'s Code <code@joindropin.com>',
-              to: 'mdonahue@joindropin.com',
+              to: final.email,
               subject: 'Test: Send to all on mailing list',
               html: template.html
             };
 
             mailgun.messages().send(emailData, function (error, body) {
-              if (error) console.log(error);
-
-              console.log(body);
+              if (error) {
+                console.log(error);
+              } else {
+                console.log('Success');
+              }
             });
           });
 
