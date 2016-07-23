@@ -17,7 +17,7 @@ var moment = require('moment');
 var promise = require('bluebird');
 var Handlebars = require('handlebars');
 
-var templateDir = path.resolve(__dirname, '..', 'templates', 'july-2016', 'test');
+var templateDir = path.resolve(__dirname, 'templates', 'july-2016', 'test');
 var template = new EmailTemplate(templateDir);
 
 // Handlebars.registerHelper('capitalize', function capitalize (context) {
