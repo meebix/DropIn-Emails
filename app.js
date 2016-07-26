@@ -13,6 +13,7 @@ Parse.serverURL = 'http://parse-uat.us-east-1.elasticbeanstalk.com/parse'
 var path = require('path');
 var EmailTemplate = require('email-templates').EmailTemplate;
 var _ = require('lodash');
+var Promise = require('bluebird');
 var moment = require('moment');
 var Handlebars = require('handlebars');
 
@@ -33,7 +34,6 @@ app.get('/send/:list', function(req, res) {
   var mailingList = req.params.list + '@joindropin.com';
 
   generateEmail(req, res, mailingList);
-  res.status(200).end();
 });
 
 // Mailing Functions
@@ -42,6 +42,8 @@ function generateEmail(req, res, mailingList) {
 
   list.members().list(function (err, data) {
     _.each(data.items, function(results) {
+      var allData = {};
+      var today = moment().minute(0).second(0).millisecond(0)._d;
 
       // User
       var User = Parse.Object.extend('User');
@@ -54,18 +56,18 @@ function generateEmail(req, res, mailingList) {
         console.log('Error retrieving user: ' + error);
       }) // End User
       .then(function(user) {
+        allData.email = user.attributes.email;
 
         // Users Rewards
         var UsersRewards = Parse.Object.extend('Users_Rewards');
         var usersRewardsQuery = new Parse.Query(UsersRewards);
 
-        var today = moment().minute(0).second(0).millisecond(0)._d;
         var sevenDaysForward = moment().add(7, 'days').minute(0).second(0).millisecond(0)._d;
 
         usersRewardsQuery.equalTo('userId', user);
         usersRewardsQuery.equalTo('userHasRedeemed', false);
-        usersRewardsQuery.greaterThanOrEqualTo('rewardActiveStart', today);
         usersRewardsQuery.lessThanOrEqualTo('rewardActiveStart', sevenDaysForward);
+        usersRewardsQuery.greaterThanOrEqualTo('rewardActiveEnd', today);
         usersRewardsQuery.include('barId');
         usersRewardsQuery.include('userId');
         return usersRewardsQuery.find().then(function(results) {
@@ -74,7 +76,6 @@ function generateEmail(req, res, mailingList) {
           _.each(results, function(result) {
             var meta = {};
 
-            meta.email = result.attributes.userId.attributes.email;
             meta.barName = result.attributes.barId.attributes.name;
             meta.rewardName = result.attributes.rewardName;
             meta.startDate = result.attributes.rewardActiveStart;
@@ -83,34 +84,62 @@ function generateEmail(req, res, mailingList) {
             rewards.push(meta);
           });
 
-          return rewards;
+          allData.rewards = rewards;
+          return allData;
         }, function(error) {
           console.log('Error retrieving users rewards objects: ' + error);
         }) // End Users Rewards
-        .then(function(rewards) {
-          var final = {
-            email: rewards[0].email,
-            rewards: rewards
-          };
+        .then(function(allData) {
+          // User
+          var User = Parse.Object.extend('User');
+          var userQuery = new Parse.Query(User);
 
-          template.render(final)
-          .then(function (template) {
-            var emailData = {
-              from: 'Mike\'s Code <code@joindropin.com>',
-              to: final.email,
-              subject: 'Test: Send to all on mailing list',
-              html: template.html
-            };
+          userQuery.equalTo('email', allData.email);
+          userQuery.first().then(function(user) {
+            return user;
+          }, function(error) {
+            console.log('Error retrieving user: ' + error);
+          })
+          .then(function(user) {
+            var Timeline = Parse.Object.extend('Users_Timeline');
+            var timelineQuery = new Parse.Query(Timeline);
 
-            mailgun.messages().send(emailData, function (error, body) {
-              if (error) {
-                console.log(error);
-              } else {
-                console.log('Success');
-              }
+            var sevenDaysAgo = moment().subtract(7, 'days').minute(0).second(0).millisecond(0)._d;
+
+            timelineQuery.equalTo('userId', user);
+            timelineQuery.equalTo('eventType', 'Reward Earned');
+            timelineQuery.lessThanOrEqualTo('date', today);
+            timelineQuery.greaterThanOrEqualTo('date', sevenDaysAgo);
+            return timelineQuery.count().then(function(total) {
+              allData.rewardsEarned = total;
+
+              return allData;
+            }, function(error) {
+              console.log(error);
             });
-          });
+          })
+          .then(function(allData) {
+            template.render(allData)
+            .then(function (template) {
+              var emailData = {
+                from: 'Mike\'s Code <code@joindropin.com>',
+                to: allData.email,
+                subject: 'Test: Send to all on mailing list',
+                html: template.html
+              };
 
+              mailgun.messages().send(emailData, function (error, body) {
+                if (error) {
+                  console.log('There was an error sending emails to the mailing list: ' + error);
+                  res.status(400).send('There was an error sending emails to the mailing list: ' + error);
+                } else {
+                  console.log('Successfully sent email to mailing list: ' + mailingList);
+                  res.status(200).send('Successfully sent email to mailing list: ' + mailingList);
+                }
+              });
+            });
+
+          });
         });
 
       });
