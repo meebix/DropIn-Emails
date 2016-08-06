@@ -16,8 +16,10 @@ var _ = require('lodash');
 var Promise = require('bluebird');
 var moment = require('moment');
 var Handlebars = require('handlebars');
+var groupBy = require('handlebars-group-by');
+Handlebars.registerHelper(groupBy(Handlebars));
 
-var templateDir = path.resolve(__dirname, 'templates', 'july-2016', 'test');
+var templateDir = path.resolve(__dirname, 'templates', 'july-2016', 'active-rewards');
 var template = new EmailTemplate(templateDir);
 
 // Handlebars.registerHelper('capitalize', function capitalize (context) {
