@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Scripts to send emails to users",
   "scripts": {
-    "start": "node ./app.js"
+  "start": "node ./app.js"
   },
   "dependencies": {
     "bluebird": "3.4.1",
