@@ -38,16 +38,16 @@
               <h3 class="bar-name">{{{value}}}</h3>
             </div>
 
-            {{#each items}}
-              <div class="col-sm-6">
-                <div style="margin-bottom: 30px;">
-                  <h4 style="line-height: 1.6; color: #FBE2B4;">{{{rewardName}}}</h4>
-                  <p>
-                    <span class="text-light">{{startDate}} &#8594; {{endDate}}</span>
-                  </p>
-                </div>
-              </div>
-            {{/each}}
+            <div class="col-sm-6">
+              {{#each items}}
+                  <div style="margin-bottom: 30px;">
+                    <h4 style="line-height: 1.6; color: #FBE2B4;">{{{rewardName}}}</h4>
+                    <p>
+                      <span class="text-light">{{startDate}} &#8594; {{endDate}}</span>
+                    </p>
+                  </div>
+              {{/each}}
+            </div>
           </div>
         </div>
       {{/group}}
