@@ -14,28 +14,24 @@
     </div>
 
     <div class="colmask leftmenu">
-      {{#group rewards by="barName"}}
         <div class="col1">
           <!-- Column 1 start -->
-          <h3 class="bar-name">{{{value}}}</h3>
+          <h3 class="bar-name">Green Rock Tap &amp; Grill</h3>
           <!-- Column 1 end -->
         </div>
         <div class="col2">
           <!-- Column 2 start -->
-          {{#each items}}
           <div style="margin-bottom: 30px;">
-            <h4 style="line-height: 1.6; color: #FBE2B4;">{{{rewardName}}}</h4>
+            <h4 style="line-height: 1.6; color: #FBE2B4;">$20 Beer with meal</h4>
             <p>
-              <span class="text-light">{{startDate}} &#8594; {{endDate}}</span>
+              <span class="text-light">Thursday July, 24 &#8594; Friday July, 25</span>
             </p>
           </div>
-          {{/each}}
           <!-- Column 2 end -->
         </div>
-      {{/group}}
     </div>
 
-    <h4 style="text-align: center; margin: 65px 0; font-weight: 300;" class="text-large">You've earned these rewards as a result of visiting <span style="color: #0AB195;"><strong>{{{rewardsEarned}}} bars</strong></span> this past week!</h4>
+    <h4 style="text-align: center; margin: 65px 0; font-weight: 300;" class="text-large">You've earned these rewards as a result of visiting <span style="color: #0AB195;"><strong>10 bars</strong></span> this past week!</h4>
 
     <hr>
 

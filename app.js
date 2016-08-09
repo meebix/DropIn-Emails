@@ -15,6 +15,7 @@ var EmailTemplate = require('email-templates').EmailTemplate;
 var _ = require('lodash');
 var Promise = require('bluebird');
 var moment = require('moment');
+var timezone = require('moment-timezone');
 var Handlebars = require('handlebars');
 var groupBy = require('handlebars-group-by');
 Handlebars.registerHelper(groupBy(Handlebars));
@@ -80,8 +81,8 @@ function generateEmail(req, res, mailingList) {
 
             meta.barName = result.attributes.barId.attributes.name;
             meta.rewardName = result.attributes.rewardName;
-            meta.startDate = result.attributes.rewardActiveStart;
-            meta.endDate = result.attributes.rewardActiveEnd;
+            meta.startDate = timezone(result.attributes.rewardActiveStart).tz("America/New_York").format("MMMM Do, h:mma");
+            meta.endDate = timezone(result.attributes.rewardActiveEnd).tz("America/New_York").format("MMMM Do, h:mma");
 
             rewards.push(meta);
           });
