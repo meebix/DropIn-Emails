@@ -8,8 +8,6 @@ html, body {
 
 body {
   padding: 15px;
-  -webkit-font-smoothing: antialiased;
-  text-shadow: rgba(0,0,0,.01) 0 0 1px;
 }
 
 a {
@@ -20,10 +18,6 @@ a {
 a:hover {
   color: inherit;
   text-decoration: none;
-}
-
-p {
-  margin: 0.25em 0;
 }
 
 hr {
@@ -37,7 +31,7 @@ h3, h4 {
 }
 
 h3 {
-  font-size: 1.35em;
+  font-size: 1.5em;
 }
 
 h4 {
@@ -59,6 +53,14 @@ h4 {
 
 .bar-spacer:last-child {
   margin-bottom: 0;
+}
+
+.hero {
+  width: 100%;
+}
+
+a.social-link {
+  text-decoration: none;
 }
 
 .text-light {
@@ -100,9 +102,11 @@ h4 {
 .colmask {
   position:relative;  /* This fixes the IE7 overflow hidden bug */
   clear:both;
-  width:70%;     /* width of whole page */
+  width:100%;     /* width of whole page */
   overflow:hidden;    /* This chops off any overhanging divs */
   margin: 0 auto;
+  text-align: center;
+  margin-bottom: 35px;
 }
 /* common column settings */
 /*.colright,
@@ -119,16 +123,18 @@ h4 {
   position:relative;
   overflow:hidden;
 }
+
+.col1{
+  margin: 25px 0;
+}
 /* 2 Column (left menu) settings */
 .leftmenu {
   /*background:#fff;     right column background colour */
 }
 
 .leftmenu .col1 {
-  width:38%;      /* right column content width */
-  padding: 0 3%;
+  width:100%;      /* right column content width */
 }
 .leftmenu .col2 {
-  width:50%;
-  padding: 0 3%;
+  width:100%;
 }
