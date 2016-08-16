@@ -125,9 +125,9 @@ function generateEmail(req, res, mailingList) {
             template.render(allData)
             .then(function (template) {
               var emailData = {
-                from: 'Mike\'s Code <code@joindropin.com>',
+                from: 'Drop In <hello@joindropin.com>',
                 to: allData.email,
-                subject: 'Test: Send to all on mailing list',
+                subject: 'My Rewards Available This Week',
                 html: template.html
               };
 
@@ -151,6 +151,8 @@ function generateEmail(req, res, mailingList) {
   });
 };
 
+
+// Start Server
 app.listen(port, function() {
   console.log('Express server listening on port ' + port);
 });
