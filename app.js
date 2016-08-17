@@ -59,10 +59,10 @@ app.get('/unsubscribe/:email', function(req, res) {
   mailgun.unsubscribes().create({address: emailAddress, tag: '*'}, function (error, body) {
     if (error) {
       console.log('You could not be unsubscribed at this time: ' + error);
-      res.status(500).send('You could not be unsubscribed at this time: ' + error);
+      res.status(500).send('You could not be unsubscribed at this time. Try again later.');
     } else {
       console.log('You\'ve successfully been removed from our mailing list');
-      res.status(200).send('You\'ve successfully been removed from our mailing list');
+      res.status(200).send('You\'ve successfully been removed from our mailing list.');
     }
   });
 });
