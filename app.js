@@ -53,6 +53,20 @@ app.get('/send/:list', function(req, res) {
   generateEmail(req, res, mailingList);
 });
 
+app.get('/unsubscribe/:email', function(req, res) {
+  var emailAddress = req.params.email;
+
+  mailgun.unsubscribes().create({address: emailAddress, tag: '*'}, function (error, body) {
+    if (error) {
+      console.log('You could not be unsubscribed at this time: ' + error);
+      res.status(500).send('You could not be unsubscribed at this time: ' + error);
+    } else {
+      console.log('You\'ve successfully been removed from our mailing list');
+      res.status(200).send('You\'ve successfully been removed from our mailing list');
+    }
+  });
+});
+
 // Mailing Functions
 function generateEmail(req, res, mailingList) {
   var list = mailgun.lists(mailingList);
