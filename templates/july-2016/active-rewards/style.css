@@ -27,7 +27,7 @@ body {
 /* -------------------------------------
 		ELEMENTS
 ------------------------------------- */
-a { color: #2BA6CB;}
+a { color: #2BA6CB; text-decoration: underline;}
 
 .btn {
 	text-decoration:none;
@@ -89,7 +89,15 @@ table.head-wrap { width: 100%; text-align: center;}
 		BODY
 ------------------------------------- */
 table.body-wrap { width: 100%;}
-
+td.spacing {
+	padding: 10px 12.5px 20px 12.5px;
+}
+td.spacing:first-child {
+	padding-left: 0;
+}
+td.spacing:last-child {
+	padding-right: 0;
+}
 
 /* -------------------------------------
 		FOOTER
@@ -101,6 +109,9 @@ table.footer-wrap { width: 100%;	clear:both!important;
 	font-size:10px;
 	font-weight: bold;
 
+}
+p.footer a {
+	color: #999999;
 }
 
 
