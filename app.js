@@ -53,16 +53,16 @@ app.get('/send/:list', function(req, res) {
   generateEmail(req, res, mailingList);
 });
 
-app.get('/unsubscribe/:email', function(req, res) {
+app.get('/resubscribe/:email', function(req, res) {
   var emailAddress = req.params.email;
 
-  mailgun.unsubscribes().create({address: emailAddress, tag: '*'}, function (error, body) {
+  mailgun.unsubscribes(emailAddress).delete(function (error, body) {
     if (error) {
-      console.log('You could not be unsubscribed at this time: ' + error);
-      res.status(500).send('You could not be unsubscribed at this time. Try again later.');
+      console.log(emailAddress + ' could not be resubscribed to the Drop In mailing list: ' + error);
+      res.status(500).send(emailAddress + ' could not be resubscribed to the Drop In mailing list.');
     } else {
-      console.log('You\'ve successfully been removed from our mailing list');
-      res.status(200).send('You\'ve successfully been removed from our mailing list.');
+      console.log(emailAddress + ' has been resubscribed to the Drop In mailing list.');
+      res.status(200).send(emailAddress + ' has been resubscribed to the Drop In mailing list.');
     }
   });
 });
@@ -147,30 +147,40 @@ function generateEmail(req, res, mailingList) {
               return allData;
             }, function(error) {
               console.log(error);
+            })
+            .then(function(allData) {
+              // Image selection
+              var randomNumberUpTo5 = Math.ceil(Math.random() * 5);
+              var s3Url = 'https://s3.amazonaws.com/joindropin.com/emails/hero-images/hero-image-{number}.jpg';
+              var imageUrl = s3Url.replace('{number}', randomNumberUpTo5);
+
+              allData.heroImage = imageUrl;
+
+              return allData;
+            })
+            .then(function(allData) {
+              template.render(allData)
+              .then(function (template) {
+                var emailData = {
+                  from: 'Drop In <hello@joindropin.com>',
+                  to: allData.email,
+                  subject: 'My Rewards Available This Week',
+                  html: template.html
+                };
+
+                mailgun.messages().send(emailData, function (error, body) {
+                  if (error) {
+                    console.log('There was an error sending emails to the mailing list: ' + error);
+                    res.status(400).send('There was an error sending emails to the mailing list: ' + error);
+                  } else {
+                    console.log('Successfully sent email to mailing list: ' + mailingList);
+                    res.status(200).send('Successfully sent email to mailing list: ' + mailingList);
+                  }
+                });
+              });
+
             });
           })
-          .then(function(allData) {
-            template.render(allData)
-            .then(function (template) {
-              var emailData = {
-                from: 'Drop In <hello@joindropin.com>',
-                to: allData.email,
-                subject: 'My Rewards Available This Week',
-                html: template.html
-              };
-
-              mailgun.messages().send(emailData, function (error, body) {
-                if (error) {
-                  console.log('There was an error sending emails to the mailing list: ' + error);
-                  res.status(400).send('There was an error sending emails to the mailing list: ' + error);
-                } else {
-                  console.log('Successfully sent email to mailing list: ' + mailingList);
-                  res.status(200).send('Successfully sent email to mailing list: ' + mailingList);
-                }
-              });
-            });
-
-          });
         });
 
       });
