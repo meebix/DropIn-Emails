@@ -60,7 +60,7 @@
 						<!-- Callout Panel -->
 						<div class="callout">
 							<h3 style="color: #222222; text-align: center;">What's New?</h3>
-							<p style="text-align: center;">Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium. totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+							<p style="text-align: center;">Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
 						</div><!-- /callout panel -->
 
 					</td>
@@ -76,17 +76,19 @@
 							<td class="small" width="20%" style="vertical-align: top; padding-right:10px;"><img src="https://s3.amazonaws.com/joindropin.com/emails/logo-only-small.png" /></td>
 							<td colspan="2"><h3 style="color: white; margin-bottom: 12px;">{{{value}}}</h3></td>
 						</tr>
-						{{#each items}}
+						{{#grouped_each 2 items}}
 							<tr>
 								<td class="small" width="20%" style="vertical-align: top; padding-right:10px;"></td>
-								<td class="spacing">
-									<h5 style="color: #FBE2B4; margin-bottom: 10px;">{{{rewardName}}}</h5>
-									<p class="date muted">Start: {{startDate}}</p>
-									<p class="date muted">Expires: {{endDate}}</p>
-									<a href="https://ad.apps.fm/Sdl4-C31pm34o8GEAEPiL_E7og6fuV2oOMeOQdRqrE1SqZdlPe9ACpS8UfwDn7-uH0Gn4n60BpUqQ-44LeEQRoAKtqkwqbT0UjzyZp_KE0g" class="btn" style="margin-top: 12px;">Redeem &raquo;</a>
-								</td>
+								{{#each this}}
+									<td class="spacing">
+										<h5 style="color: #FBE2B4; margin-bottom: 10px;">{{{rewardName}}}</h5>
+										<p class="date muted">Start: {{startDate}}</p>
+										<p class="date muted">Expires: {{endDate}}</p>
+										<a href="https://ad.apps.fm/Sdl4-C31pm34o8GEAEPiL_E7og6fuV2oOMeOQdRqrE1SqZdlPe9ACpS8UfwDn7-uH0Gn4n60BpUqQ-44LeEQRoAKtqkwqbT0UjzyZp_KE0g" class="btn" style="margin-top: 12px;">Redeem &raquo;</a>
+									</td>
+								{{/each}}
 							</tr>
-						{{/each}}
+						{{/grouped_each}}
 					</table>
 				</div>
 			{{/group}}

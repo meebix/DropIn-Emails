@@ -44,7 +44,7 @@ a { color: #2BA6CB; text-decoration: underline;}
 .callout {
 	padding:15px;
 	background-color:rgba(255, 255, 255, 0.25);
-	margin: 30px 0;
+	margin-bottom: 10px;
 }
 .callout a {
 	font-weight:bold;
@@ -92,7 +92,7 @@ table.body-wrap { width: 100%;}
 td.spacing {
 	padding: 10px 12.5px 20px 12.5px;
 }
-td.spacing:first-child {
+td.spacing:nth-child(2) {
 	padding-left: 0;
 }
 td.spacing:last-child {
@@ -141,6 +141,7 @@ p, ul {
 p.lead { font-size:17px; }
 p.last { margin-bottom:0px;}
 p.muted { color: #CCCCCC; }
+p.date { margin-bottom: 0; }
 p a { margin-right: 20px; }
 p a:last-child { margin-right: 0; }
 
