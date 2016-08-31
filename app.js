@@ -33,6 +33,13 @@ Handlebars.registerHelper('grouped_each', function(every, context, options) {
   }
   return out;
 });
+Handlebars.registerHelper('greaterThan', function(value, number, options) {
+  if (value > number) {
+    return options.fn(this);
+  }
+
+  return options.inverse(this);
+});
 
 var templateDir = path.resolve(__dirname, 'templates', 'july-2016', 'active-rewards');
 var template = new EmailTemplate(templateDir);
