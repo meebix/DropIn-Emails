@@ -8,7 +8,7 @@ var mailgun = require('mailgun-js')({apiKey: api_key, domain: domain});
 
 var Parse = require('parse/node');
 Parse.initialize(process.env.PARSE_ID);
-Parse.serverURL = 'http://parse-uat.us-east-1.elasticbeanstalk.com/parse'
+Parse.serverURL = process.env.PARSE_SERVER_URL;
 
 var path = require('path');
 var EmailTemplate = require('email-templates').EmailTemplate;
@@ -18,6 +18,11 @@ var moment = require('moment');
 var timezone = require('moment-timezone');
 var Handlebars = require('handlebars');
 var groupBy = require('handlebars-group-by');
+
+var templateDir = path.resolve(__dirname, 'templates', 'july-2016', 'active-rewards');
+var template = new EmailTemplate(templateDir);
+
+// Handlebars Helpers
 Handlebars.registerHelper(groupBy(Handlebars));
 Handlebars.registerHelper('grouped_each', function(every, context, options) {
   var out = "", subcontext = [], i;
@@ -33,6 +38,7 @@ Handlebars.registerHelper('grouped_each', function(every, context, options) {
   }
   return out;
 });
+
 Handlebars.registerHelper('greaterThan', function(value, number, options) {
   if (value > number) {
     return options.fn(this);
@@ -40,17 +46,6 @@ Handlebars.registerHelper('greaterThan', function(value, number, options) {
 
   return options.inverse(this);
 });
-
-var templateDir = path.resolve(__dirname, 'templates', 'july-2016', 'active-rewards');
-var template = new EmailTemplate(templateDir);
-
-// Handlebars.registerHelper('capitalize', function capitalize (context) {
-//   return context.toUpperCase()
-// })
-
-// Handlebars.registerPartial('name',
-//   '{{ capitalize name.first }} {{ capitalize name.last }}'
-// )
 
 // Routes
 app.get('/send/:list', function(req, res) {
@@ -195,7 +190,6 @@ function generateEmail(req, res, mailingList) {
     });
   });
 };
-
 
 // Start Server
 app.listen(port, function() {
