@@ -12,6 +12,8 @@ Parse.serverURL = process.env.PARSE_SERVER_URL;
 
 var path = require('path');
 var EmailTemplate = require('email-templates').EmailTemplate;
+var templateDir = path.resolve(__dirname, 'templates', 'july-2016', 'active-rewards');
+var template = new EmailTemplate(templateDir);
 var _ = require('lodash');
 var Promise = require('bluebird');
 var moment = require('moment');
@@ -24,6 +26,8 @@ var template = new EmailTemplate(templateDir);
 
 // Handlebars Helpers
 Handlebars.registerHelper(groupBy(Handlebars));
+
+// Custom Handlebar Helpers
 Handlebars.registerHelper('grouped_each', function(every, context, options) {
   var out = "", subcontext = [], i;
   if (context && context.length > 0) {
