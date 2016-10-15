@@ -99,17 +99,20 @@
 			<!-- /content -->
 
 			<!-- content -->
-			<div style="padding: 0 15px; max-width: 600px; margin: 0 auto; display: block;">
-				<div class="content">
-					<table bgcolor="">
-						<tr>
-							<td class="container" align="center">
-								<p style="color: #dddddd; font-size: 16px; padding: 0 20px; line-height: 1.2;">Congratulations! You've earned these rewards from visiting <strong style="color: white; font-size: 20px;">{{rewardsEarned}} {{#greaterThan rewardsEarned 1}}bars{{else}}bar{{/greaterThan}}</strong> over the past week!</p>
-							</td>
-						</tr>
-					</table>
+			{{#greaterThan rewardsEarned 0}}
+				<div style="padding: 0 15px; max-width: 600px; margin: 0 auto; display: block;">
+					<div class="content">
+						<table bgcolor="">
+							<tr>
+								<td class="container" align="center">
+									<p style="color: #dddddd; font-size: 16px; padding: 0 20px; line-height: 1.2;">Congratulations! You've earned these rewards from visiting <strong style="color: white; font-size: 20px;">{{rewardsEarned}} {{#greaterThan rewardsEarned 1}}bars{{else}}bar{{/greaterThan}}</strong> over the past week!</p>
+								</td>
+							</tr>
+						</table>
+					</div>
 				</div>
-			</div><!-- /content -->
+			{{/greaterThan}}
+			<!-- /content -->
 
 			<!-- Callout Panel -->
 			<div class="content">
