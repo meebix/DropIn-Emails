@@ -11,6 +11,7 @@ Parse.initialize(process.env.PARSE_ID);
 Parse.serverURL = process.env.PARSE_SERVER_URL;
 
 var path = require('path');
+var curl = require('curlrequest');
 var EmailTemplate = require('email-templates').EmailTemplate;
 var templateDir = path.resolve(__dirname, 'templates', 'july-2016', 'active-rewards');
 var template = new EmailTemplate(templateDir);
@@ -51,6 +52,8 @@ Handlebars.registerHelper('greaterThan', function(value, number, options) {
   return options.inverse(this);
 });
 
+
+
 // Routes
 app.get('/send/:list', function(req, res) {
   // Name of the mailing list before @ {String}
@@ -73,127 +76,166 @@ app.get('/resubscribe/:email', function(req, res) {
   });
 });
 
+
+
 // Mailing Functions
 function generateEmail(req, res, mailingList) {
   var list = mailgun.lists(mailingList);
 
   list.members().list(function (err, data) {
-    _.each(data.items, function(results) {
-      var allData = {};
-      var today = moment().minute(0).second(0).millisecond(0)._d;
+    var pageCount = Math.ceil(data.total_count/100);
+    var getMembersUrl = 'https://api.mailgun.net/v3/lists/' + mailingList + '/members/pages';
 
-      // User
-      var User = Parse.Object.extend('User');
-      var userQuery = new Parse.Query(User);
+    var getAddress = function(pageCount, url) {
+      --pageCount;
 
-      userQuery.equalTo('email', results.address);
-      userQuery.first().then(function(user) {
-        return user;
-      }, function(error) {
-        console.log('Error retrieving user: ' + error);
-      }) // End User
-      .then(function(user) {
-        allData.email = user.attributes.email;
+      var options = {
+        url: url,
+        user: 'api:' + process.env.MG_API_KEY
+      };
 
-        // Users Rewards
-        var UsersRewards = Parse.Object.extend('Users_Rewards');
-        var usersRewardsQuery = new Parse.Query(UsersRewards);
+      curl.request(options, function(err, data) {
+        var results = JSON.parse(data);
+        var nextUrl = results.paging.next.toString();
 
-        var sevenDaysForward = moment().add(7, 'days').minute(0).second(0).millisecond(0)._d;
+        var promise = Parse.Promise.as();
+        _.each(results.items, function(results) {
+          promise = promise.then(function() {
+            var allData = {};
+            var today = moment().minute(0).second(0).millisecond(0)._d;
 
-        usersRewardsQuery.equalTo('userId', user);
-        usersRewardsQuery.equalTo('userHasRedeemed', false);
-        usersRewardsQuery.lessThanOrEqualTo('rewardActiveStart', sevenDaysForward);
-        usersRewardsQuery.greaterThanOrEqualTo('rewardActiveEnd', today);
-        usersRewardsQuery.include('barId');
-        usersRewardsQuery.include('userId');
-        return usersRewardsQuery.find().then(function(results) {
-          var rewards = [];
+            // User
+            var User = Parse.Object.extend('User');
+            var userQuery = new Parse.Query(User);
 
-          _.each(results, function(result) {
-            var meta = {};
-
-            meta.barName = result.attributes.barId.attributes.name;
-            meta.rewardName = result.attributes.rewardName;
-            meta.startDate = timezone(result.attributes.rewardActiveStart).tz("America/New_York").format("MMMM Do, h:mma");
-            meta.endDate = timezone(result.attributes.rewardActiveEnd).tz("America/New_York").format("MMMM Do, h:mma");
-
-            rewards.push(meta);
-          });
-
-          allData.rewards = rewards;
-          return allData;
-        }, function(error) {
-          console.log('Error retrieving users rewards objects: ' + error);
-        }) // End Users Rewards
-        .then(function(allData) {
-          // User
-          var User = Parse.Object.extend('User');
-          var userQuery = new Parse.Query(User);
-
-          userQuery.equalTo('email', allData.email);
-          userQuery.first().then(function(user) {
-            return user;
-          }, function(error) {
-            console.log('Error retrieving user: ' + error);
-          })
-          .then(function(user) {
-            var Timeline = Parse.Object.extend('Users_Timeline');
-            var timelineQuery = new Parse.Query(Timeline);
-
-            var sevenDaysAgo = moment().subtract(7, 'days').minute(0).second(0).millisecond(0)._d;
-
-            timelineQuery.equalTo('userId', user);
-            timelineQuery.equalTo('eventType', 'Reward Earned');
-            timelineQuery.lessThanOrEqualTo('date', today);
-            timelineQuery.greaterThanOrEqualTo('date', sevenDaysAgo);
-            return timelineQuery.count().then(function(total) {
-              allData.rewardsEarned = total;
-
-              return allData;
+            userQuery.equalTo('email', results.address);
+            userQuery.first().then(function(user) {
+              return user;
             }, function(error) {
-              console.log(error);
-            })
-            .then(function(allData) {
-              // Image selection
-              var randomNumberUpTo5 = Math.ceil(Math.random() * 5);
-              var s3Url = 'https://s3.amazonaws.com/joindropin.com/emails/hero-images/hero-image-{number}.jpg';
-              var imageUrl = s3Url.replace('{number}', randomNumberUpTo5);
+              console.log('Error retrieving user: ' + error);
+            }) // End User
+            .then(function(user) {
+              allData.email = user.attributes.email;
 
-              allData.heroImage = imageUrl;
+              // Users Rewards
+              var UsersRewards = Parse.Object.extend('Users_Rewards');
+              var usersRewardsQuery = new Parse.Query(UsersRewards);
 
-              return allData;
-            })
-            .then(function(allData) {
-              template.render(allData)
-              .then(function (template) {
-                var emailData = {
-                  from: 'Drop In <hello@joindropin.com>',
-                  to: allData.email,
-                  subject: 'My Rewards Available This Week',
-                  html: template.html
-                };
+              var sevenDaysForward = moment().add(7, 'days').minute(0).second(0).millisecond(0)._d;
 
-                mailgun.messages().send(emailData, function (error, body) {
-                  if (error) {
-                    console.log('There was an error sending emails to the mailing list: ' + error);
-                    res.status(400).send('There was an error sending emails to the mailing list: ' + error);
-                  } else {
-                    console.log('Successfully sent email to mailing list: ' + mailingList);
-                    res.status(200).send('Successfully sent email to mailing list: ' + mailingList);
-                  }
+              usersRewardsQuery.equalTo('userId', user);
+              usersRewardsQuery.equalTo('userHasRedeemed', false);
+              usersRewardsQuery.lessThanOrEqualTo('rewardActiveStart', sevenDaysForward);
+              usersRewardsQuery.greaterThanOrEqualTo('rewardActiveEnd', today);
+              usersRewardsQuery.include('barId');
+              usersRewardsQuery.include('userId');
+              return usersRewardsQuery.find().then(function(results) {
+                var rewards = [];
+
+                _.each(results, function(result) {
+                  var meta = {};
+
+                  meta.barName = result.attributes.barId.attributes.name;
+                  meta.rewardName = result.attributes.rewardName;
+                  meta.startDate = timezone(result.attributes.rewardActiveStart).tz("America/New_York").format("MMMM Do, h:mma");
+                  meta.endDate = timezone(result.attributes.rewardActiveEnd).tz("America/New_York").format("MMMM Do, h:mma");
+
+                  rewards.push(meta);
                 });
-              });
 
+                allData.rewards = rewards;
+                return allData;
+              }, function(error) {
+                console.log('Error retrieving users rewards objects: ' + error);
+              }) // End Users Rewards
+              .then(function(allData) {
+                // User
+                var User = Parse.Object.extend('User');
+                var userQuery = new Parse.Query(User);
+
+                userQuery.equalTo('email', allData.email);
+                userQuery.first().then(function(user) {
+                  return user;
+                }, function(error) {
+                  console.log('Error retrieving user: ' + error);
+                })
+                .then(function(user) {
+                  var Timeline = Parse.Object.extend('Users_Timeline');
+
+                  var sevenDaysAgo = moment().subtract(7, 'days').minute(0).second(0).millisecond(0)._d;
+
+                  var rewardEarnedType = new Parse.Query(Timeline);
+                  var referralRewardType = new Parse.Query(Timeline);
+                  rewardEarnedType.equalTo('eventType', 'Reward Earned');
+                  referralRewardType.equalTo('eventType', 'Referral Reward');
+
+                  var timelineQuery = Parse.Query.or(rewardEarnedType, referralRewardType);
+
+                  timelineQuery.equalTo('userId', user);
+                  timelineQuery.lessThanOrEqualTo('date', today);
+                  timelineQuery.greaterThanOrEqualTo('date', sevenDaysAgo);
+                  return timelineQuery.count().then(function(total) {
+                    allData.rewardsEarned = total;
+
+                    return allData;
+                  }, function(error) {
+                    console.log(error);
+                  })
+                  .then(function(allData) {
+                    // Image selection
+                    var randomNumberUpTo5 = Math.ceil(Math.random() * 5);
+                    var s3Url = 'https://s3.amazonaws.com/joindropin.com/emails/hero-images/hero-image-{number}.jpg';
+                    var imageUrl = s3Url.replace('{number}', randomNumberUpTo5);
+
+                    allData.heroImage = imageUrl;
+
+                    return allData;
+                  })
+                  .then(function(allData) {
+                    template.render(allData)
+                    .then(function (template) {
+                      var emailData = {
+                        from: 'Drop In <hello@joindropin.com>',
+                        to: allData.email,
+                        subject: 'My Rewards Available This Week',
+                        html: template.html
+                      };
+
+                      // Filter users who have rewards and only send emails to them
+                      if (allData.rewards.length) {
+                        mailgun.messages().send(emailData, function (error, body) {
+                          if (error) {
+                            console.log(allData.email + ', ' + 'There was an error sending the email to this user: ' + {error: error});
+                          } else {
+                            console.log(allData.email + ', ' + 'Successfully sent the email to this user.');
+                          }
+                        });
+                      } else {
+                        console.log(allData.email + ', ' + 'The email was not sent to this user because they do not have any rewards that meet the email criteria.');
+                      }
+                    });
+                  });
+                })
+              });
             });
-          })
+          });
         });
 
-      });
+        if (pageCount > 0) {
+          return getAddress(pageCount, nextUrl);
+        } else {
+          res.status(200).send('Emails to members of ' + mailingList + ' are now being sent.');
+        }
 
-    });
+        return promise;
+      });
+    };
+
+    getAddress(pageCount, getMembersUrl);
   });
 };
+
+
 
 // Start Server
 app.listen(port, function() {
