@@ -221,14 +221,14 @@ function generateEmail(req, res, mailingList) {
           });
         });
 
+        if (pageCount > 0) {
+          return getAddress(pageCount, nextUrl);
+        } else {
+          res.status(200).send('Emails to members of ' + mailingList + ' are now being sent.');
+        }
+
         return promise;
       });
-
-      if (pageCount > 0) {
-        return getAddress(pageCount, nextUrl);
-      } else {
-        res.status(200).send('Emails to members of ' + mailingList + ' are now being sent.');
-      }
     };
 
     getAddress(pageCount, getMembersUrl);
