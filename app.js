@@ -112,7 +112,7 @@ function generateEmail(req, res, mailingList) {
             userQuery.first().then(function(user) {
               return user;
             }, function(error) {
-              console.log('Error retrieving user: ' + error);
+              console.log('Error retrieving user: ' + error.error);
             }) // End User
             .then(function(user) {
               allData.email = user.attributes.email;
@@ -146,7 +146,7 @@ function generateEmail(req, res, mailingList) {
                 allData.rewards = rewards;
                 return allData;
               }, function(error) {
-                console.log('Error retrieving users rewards objects: ' + error);
+                console.log('Error retrieving users rewards objects: ' + error.error);
               }) // End Users Rewards
               .then(function(allData) {
                 // User
@@ -201,15 +201,18 @@ function generateEmail(req, res, mailingList) {
                         html: template.html
                       };
 
+                      console.log('******** TEST *********');
+
                       // Filter users who have rewards and only send emails to them
                       if (allData.rewards.length) {
-                        mailgun.messages().send(emailData, function (error, body) {
-                          if (error) {
-                            console.log(allData.email + ', ' + 'There was an error sending the email to this user: ' + {error: error});
-                          } else {
-                            console.log(allData.email + ', ' + 'Successfully sent the email to this user.');
-                          }
-                        });
+                        console.log(allData.email + ', ' + 'Successfully sent the email to this user.');
+                        // mailgun.messages().send(emailData, function (error, body) {
+                        //   if (error) {
+                        //     console.log(allData.email + ', ' + 'There was an error sending the email to this user: ' + {error: error});
+                        //   } else {
+                        //     console.log(allData.email + ', ' + 'Successfully sent the email to this user.');
+                        //   }
+                        // });
                       } else {
                         console.log(allData.email + ', ' + 'The email was not sent to this user because they do not have any rewards that meet the email criteria.');
                       }
