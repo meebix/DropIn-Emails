@@ -108,6 +108,8 @@ function generateEmail(req, res, mailingList) {
             var User = Parse.Object.extend('User');
             var userQuery = new Parse.Query(User);
 
+            console.log('Retrieving: ' + results.address);
+
             userQuery.equalTo('email', results.address);
             userQuery.first().then(function(user) {
               return user;
