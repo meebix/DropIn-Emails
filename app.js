@@ -82,7 +82,7 @@ function generateEmail(req, res, mailingList) {
   var list = mailgun.lists(mailingList);
   var masterData = {};
 
-  list.members().list({limit: 1}).then(function(data) {
+  list.members().list().then(function(data) {
     masterData.pageCount = data.total_count;
     masterData.getMembersUrl = 'https://api.mailgun.net/v3/lists/' + mailingList + '/members/pages';
 
@@ -92,6 +92,7 @@ function generateEmail(req, res, mailingList) {
   })
   .then(function(masterData) {
     getAddress(masterData.pageCount, masterData.getMembersUrl);
+    res.send('Sending emails to members of: ' + mailingList);
   });
 };
 
