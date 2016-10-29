@@ -92,6 +92,7 @@ function generateEmail(req, res, mailingList) {
   })
   .then(function(masterData) {
     getAddress(masterData.pageCount, masterData.getMembersUrl);
+    res.send('Sending emails to members of: ' + mailingList);
   });
 };
 
@@ -191,12 +192,11 @@ var getAddress = function(pageCount, url) {
                 };
 
                 if (userData.rewards.length) {
-                  console.log(userData.email + ', ' + 'Successfully sent the email to this user.');
-                  // return mailgun.messages().send(emailData).then(function(result) {
-                  //   console.log(userData.email + ', ' + 'Successfully sent the email to this user.');
-                  // }, function(err) {
-                  //   console.log(userData.email + ', ' + 'There was an error sending the email to this user: ' + {error: error});
-                  // });
+                  return mailgun.messages().send(emailData).then(function(result) {
+                    console.log(userData.email + ', ' + 'Successfully sent the email to this user.');
+                  }, function(err) {
+                    console.log(userData.email + ', ' + 'There was an error sending the email to this user: ' + {error: error});
+                  });
                 } else {
                   console.log(userData.email + ', ' + 'This user was skipped because they have no rewards meeting the criteria to send the email.');
                 }
