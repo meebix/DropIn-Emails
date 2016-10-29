@@ -76,15 +76,14 @@ app.get('/resubscribe/:email', function(req, res) {
 });
 
 
+
 // Mailing Functions
 function generateEmail(req, res, mailingList) {
-  // console.log('1');
   var list = mailgun.lists(mailingList);
   var masterData = {};
 
-  list.members().list().then(function(data) {
-    // console.log('2');
-    masterData.pageCount = Math.ceil(data.total_count / 100);
+  list.members().list({limit: 1}).then(function(data) {
+    masterData.pageCount = data.total_count;
     masterData.getMembersUrl = 'https://api.mailgun.net/v3/lists/' + mailingList + '/members/pages';
 
     return masterData;
@@ -92,7 +91,6 @@ function generateEmail(req, res, mailingList) {
     console.log('Error retrieving mailing list contacts: ' + err);
   })
   .then(function(masterData) {
-    // console.log('3');
     getAddress(masterData.pageCount, masterData.getMembersUrl);
   });
 };
@@ -102,22 +100,18 @@ function generateEmail(req, res, mailingList) {
 var getAddress = function(pageCount, url) {
   --pageCount;
 
-  // console.log('4');
-  var promise = new Parse.Promise();
   var options = {
     url: url,
     user: 'api:' + process.env.MG_API_KEY
   };
 
   curl.request(options, function(err, data) {
-    // console.log('5');
     var results = JSON.parse(data);
     var nextUrl = results.paging.next.toString();
-    var promises = [];
+    var promise = Parse.Promise.as();
 
     _.each(results.items, function(item) {
-      var prepareData = function() {
-        // console.log('Start Promise');
+      promise = promise.then(function() {
         var userData = {};
         // User
         var User = Parse.Object.extend('User');
@@ -125,13 +119,11 @@ var getAddress = function(pageCount, url) {
 
         userQuery.equalTo('email', item.address);
         return userQuery.first().then(function(userObj) {
-          // console.log('7');
           return userObj;
         }, function(err) {
           console.log('Error retrieving user: ' + err);
         })
         .then(function(userObj) {
-          // console.log('8');
           userData.user = userObj;
           userData.email = userObj.attributes.email;
 
@@ -149,7 +141,6 @@ var getAddress = function(pageCount, url) {
           usersRewardsQuery.include('barId');
           usersRewardsQuery.include('userId');
           return usersRewardsQuery.find().then(function(rewards) {
-            // console.log('9');
             userData.rewards = rewards;
 
             return userData;
@@ -157,7 +148,6 @@ var getAddress = function(pageCount, url) {
             console.log('Error retrieving users rewards: ' + err);
           })
           .then(function(userData) {
-            // console.log('10');
             var Timeline = Parse.Object.extend('Users_Timeline');
 
             var today = moment().minute(0).second(0).millisecond(0)._d;
@@ -174,7 +164,6 @@ var getAddress = function(pageCount, url) {
             timelineQuery.lessThanOrEqualTo('date', today);
             timelineQuery.greaterThanOrEqualTo('date', sevenDaysAgo);
             return timelineQuery.count().then(function(total) {
-              // console.log('11');
               userData.rewardsEarned = total;
 
               return userData;
@@ -182,7 +171,6 @@ var getAddress = function(pageCount, url) {
               console.log('Error retrieving timeline: ' + err);
             })
             .then(function(userData) {
-              // console.log('12');
               // Image selection
               var randomNumberUpTo5 = Math.ceil(Math.random() * 5);
               var s3Url = 'https://s3.amazonaws.com/joindropin.com/emails/hero-images/hero-image-{number}.jpg';
@@ -193,9 +181,8 @@ var getAddress = function(pageCount, url) {
               return userData;
             })
             .then(function(userData) {
-              // console.log('13');
               return template.render(userData).then(function(template) {
-                // console.log('14');
+                console.log('----------------');
                 var emailData = {
                   from: 'Drop In <hello@joindropin.com>',
                   to: userData.email,
@@ -217,19 +204,10 @@ var getAddress = function(pageCount, url) {
             });
           });
         });
-        // console.log('End Promise');
-      };
-
-      promises.push(prepareData());
+      });
     });
 
-    // console.log('Return promise');
-    return Parse.Promise.when(promises).then(function() {
-      if (pageCount > 0) {
-        console.log('XXXXXXXXXXXXXXXXXXXXXXXXXX', pageCount, nextUrl);
-        return getAddress(pageCount, nextUrl);
-      }
-    });
+    return promise;
   });
 };
 
