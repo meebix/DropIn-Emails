@@ -99,8 +99,6 @@ function generateEmail(req, res, mailingList) {
 
 // Utility Functions
 var getAddress = function(pageCount, url) {
-  --pageCount;
-
   var options = {
     url: url,
     user: 'api:' + process.env.MG_API_KEY
@@ -142,8 +140,20 @@ var getAddress = function(pageCount, url) {
           usersRewardsQuery.include('barId');
           usersRewardsQuery.include('userId');
           return usersRewardsQuery.find().then(function(rewards) {
-            userData.rewards = rewards;
+            var preparedRewards = [];
 
+            _.each(rewards, function(result) {
+              var meta = {};
+
+              meta.barName = result.attributes.barId.attributes.name;
+              meta.rewardName = result.attributes.rewardName;
+              meta.startDate = timezone(result.attributes.rewardActiveStart).tz("America/New_York").format("MMMM Do, h:mma");
+              meta.endDate = timezone(result.attributes.rewardActiveEnd).tz("America/New_York").format("MMMM Do, h:mma");
+
+              preparedRewards.push(meta);
+            });
+
+            userData.rewards = preparedRewards;
             return userData;
           }, function(err) {
             console.log('Error retrieving users rewards: ' + err);
