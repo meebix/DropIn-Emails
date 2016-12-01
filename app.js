@@ -118,6 +118,8 @@ var getAddress = function(pageCount, url) {
 
         userQuery.equalTo('email', item.address);
         return userQuery.first().then(function(userObj) {
+          console.log('User: ', userObj);
+
           return userObj;
         }, function(err) {
           console.log('Error retrieving user: ' + err);
@@ -194,6 +196,7 @@ var getAddress = function(pageCount, url) {
             .then(function(userData) {
               return template.render(userData).then(function(template) {
                 console.log('----------------');
+                console.log('userData: ', userData);
                 var emailData = {
                   from: 'Drop In <hello@joindropin.com>',
                   to: userData.email,
