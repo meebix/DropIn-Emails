@@ -204,15 +204,15 @@ var getAddress = function(pageCount, url) {
                   html: template.html
                 };
 
-                if (userData.rewards.length) {
+                // if (userData.rewards.length) {
                   return mailgun.messages().send(emailData).then(function(result) {
                     console.log(userData.email + ', ' + 'Successfully sent the email to this user.');
                   }, function(err) {
                     console.log(userData.email + ', ' + 'There was an error sending the email to this user: ' + {error: error});
                   });
-                } else {
-                  console.log(userData.email + ', ' + 'This user was skipped because they have no rewards meeting the criteria to send the email.');
-                }
+                // } else {
+                //   console.log(userData.email + ', ' + 'This user was skipped because they have no rewards meeting the criteria to send the email.');
+                // }
               });
             });
           });
