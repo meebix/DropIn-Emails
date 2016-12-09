@@ -67,10 +67,10 @@ app.get('/unsubscribe/:email', function(req, res) {
   mailgun.unsubscribes().create({address: emailAddress, tag: '*'}, function (error, body) {
     if (error) {
       console.log(emailAddress + ' could not be unsubscribed from the Drop In mailing list: ' + error);
-      res.status(500).send(emailAddress + ' could not be unsubscribed from the Drop In mailing list.');
+      res.status(500).send('Unfortunately, there was an error unsubscribing your email address. Please contact support@joindropin.com.');
     } else {
       console.log(emailAddress + ' has been unsubscribed from the Drop In mailing list.');
-      res.status(200).send(emailAddress + ' has been unsubscribed from the Drop In mailing list.');
+      res.status(200).send('You have successfully been unsubscribed from the Drop In mailing lists.');
     }
   });
 });
