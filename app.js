@@ -61,6 +61,20 @@ app.get('/send/:list', function(req, res) {
   generateEmail(req, res, mailingList);
 });
 
+app.get('/unsubscribe/:email', function(req, res) {
+  var emailAddress = req.params.email;
+
+  mailgun.unsubscribes().create({address: emailAddress, tag: '*'}, function (error, body) {
+    if (error) {
+      console.log(emailAddress + ' could not be unsubscribed from the Drop In mailing list: ' + error);
+      res.status(500).send(emailAddress + ' could not be unsubscribed from the Drop In mailing list.');
+    } else {
+      console.log(emailAddress + ' has been unsubscribed from the Drop In mailing list.');
+      res.status(200).send(emailAddress + ' has been unsubscribed from the Drop In mailing list.');
+    }
+  });
+});
+
 app.get('/resubscribe/:email', function(req, res) {
   var emailAddress = req.params.email;
 
