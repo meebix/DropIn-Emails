@@ -96,7 +96,7 @@ function generateEmail(req, res, mailingList) {
   var list = mailgun.lists(mailingList);
   var masterData = {};
 
-  list.members().list({limit: 1}).then(function(data) {
+  list.members().list().then(function(data) {
     masterData.pageCount = data.total_count;
     masterData.getMembersUrl = 'https://api.mailgun.net/v3/lists/' + mailingList + '/members/pages';
 
@@ -214,7 +214,7 @@ var getAddress = function(pageCount, url) {
                 var emailData = {
                   from: 'Drop In <hello@joindropin.com>',
                   to: userData.email,
-                  subject: 'Drop In Holiday Happy Hour next Wed!',
+                  subject: 'New Venues Added -- Willie McBride\'s &amp; Urban Coalhouse!',
                   html: template.html
                 };
 
