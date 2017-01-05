@@ -214,7 +214,7 @@ var getAddress = function(pageCount, url) {
                 var emailData = {
                   from: 'Drop In <hello@joindropin.com>',
                   to: userData.email,
-                  subject: 'New Venues Added -- Willie McBride\'s & Urban Coalhouse!',
+                  subject: 'Drop In App v3.0 is now available!',
                   html: template.html
                 };
 
