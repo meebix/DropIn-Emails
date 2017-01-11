@@ -214,7 +214,7 @@ var getAddress = function(pageCount, url) {
                 var emailData = {
                   from: 'Drop In <hello@joindropin.com>',
                   to: userData.email,
-                  subject: 'Drop In App v3.0 is now available!',
+                  subject: 'Rewards for life - Join the Drop In team!',
                   html: template.html
                 };
 
